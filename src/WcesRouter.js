@@ -1,39 +1,43 @@
-import { html, css, LitElement } from 'lit-element';
+import { html, LitElement } from 'lit-element';
+import { installRouter } from 'pwa-helpers/router.js';
 
+import { WcesRouterBrain } from "./WcesRouterBrain.js";
+
+customElements.define('wces-router-brain', WcesRouterBrain);
+
+/**
+ * A component that listens to browser location change and performs routing
+ * @element wces-router
+ */
 export class WcesRouter extends LitElement {
-  static get styles() {
-    return css`
-      :host {
-        --wces-router-text-color: #000;
-
-        display: block;
-        padding: 25px;
-        color: var(--wces-router-text-color);
-      }
-    `;
-  }
 
   static get properties() {
     return {
-      title: { type: String },
-      counter: { type: Number },
+      _location: { type: Object},
+      routes: { type: Array },
+      route404: { type: Object }
     };
-  }
-
-  constructor() {
-    super();
-    this.title = 'Hey there';
-    this.counter = 5;
-  }
-
-  __increment() {
-    this.counter += 1;
   }
 
   render() {
     return html`
-      <h2>${this.title} Nr. ${this.counter}!</h2>
-      <button @click=${this.__increment}>increment</button>
+      <wces-router-brain
+        .location="${this._location}"
+        .routes="${this.routes}"
+        .route404="${this.route404}">
+      </wces-router-brain>
     `;
+  }
+
+  /**
+   *
+   * @param {import('lit-element').PropertyValues} changedProperties
+   */
+  firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
+
+    installRouter(location => {
+      this._location = { ...location }; // Because location object keep the same reference - This is to force update
+    });
   }
 }

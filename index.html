@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en-GB">
+
+<head>
+  <meta charset="utf-8">
+  <base href="/">
+  <style>
+    body {
+      background: #fafafa;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="demo"></div>
+
+  <script type="module">
+    import { html, render } from "lit-html";
+    import './wces-router.js';
+    import './demo/app-page1.js';
+
+    const routes = [
+      {
+        id: 'page1',
+        pattern: '(/)',
+        component: 'app-page1'
+      },
+      {
+        id: 'page2',
+        pattern: '/page2/:name',
+        component: 'app-page2',
+        url: '/demo/app-page2.js'
+      }
+    ];
+    const route404 = {
+      id: 'route404',
+      component: 'app-404',
+      url: '/demo/app-404.js'
+    }
+
+    window.addEventListener('load', () => {
+      const rootEl = document.getElementById('demo');
+
+      render(
+        html`<wces-router .routes="${routes}" .route404="${route404}"></wces-router>`,
+        rootEl
+      );
+    })
+  </script>
+</body>
+
+</html>
