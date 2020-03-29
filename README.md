@@ -4,17 +4,58 @@ This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) reco
 
 ## Installation
 ```bash
-npm i wces-router
+npm i @wces/router
 ```
 
-## Usage
+## Example Usage
 ```html
 <script type="module">
-  import 'wces-router/wces-router.js';
+  import { html, render } from "lit-html";
+  import './wces-router.js';
+  import './demo/app-page1.js';
+
+  const routes = [
+    {
+      id: 'page1',
+      pattern: '(/)',
+      component: 'app-page1'
+    },
+    {
+      id: 'page2',
+      pattern: '/page2/:name',
+      component: 'app-page2',
+      url: '/demo/app-page2.js'
+    }
+  ];
+  const route404 = {
+    id: 'route404',
+    component: 'app-404',
+    url: '/demo/app-404.js'
+  }
+
+  window.addEventListener('load', () => {
+    const rootEl = document.getElementById('demo');
+
+    render(
+      html`<wces-router .routes="${routes}" .route404="${route404}"></wces-router>`,
+      rootEl
+    );
+  })
 </script>
 
-<wces-router></wces-router>
+<div id="demo"></div>
 ```
+
+## Features
+
+### Lazy loading
+  ...
+
+### Route path params and query params
+  ...
+
+### Optional 404 route
+  ...
 
 ## Linting with ESLint, Prettier, and Types
 To scan the project for linting errors, run
@@ -66,4 +107,4 @@ If you customize the configuration a lot, you can consider moving them to indivi
 ```bash
 npm start
 ```
-To run a local development server that serves the basic demo located in `demo/index.html`
+To run a local development server that serves the basic demo located in `index.html`
