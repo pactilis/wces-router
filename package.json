@@ -1,6 +1,6 @@
 {
   "name": "@wces/router",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Webcomponent wces-router following open-wc recommendations",
   "author": "wces-router",
   "license": "MIT",
