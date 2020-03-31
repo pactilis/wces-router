@@ -1,7 +1,7 @@
 import { parseRoute } from './route-parser.js';
 
 const template = document.createElement('template');
-template.innerHTML =`
+template.innerHTML = `
   <style>
     .page {
       display: none;
@@ -15,7 +15,6 @@ template.innerHTML =`
 `;
 
 export class WcesRouterBrain extends HTMLElement {
-
   constructor() {
     super();
     /**
@@ -26,6 +25,11 @@ export class WcesRouterBrain extends HTMLElement {
      * @type {RoutingConfig}
      */
     this.route404 = null;
+
+    /**
+     * Router object to pass down to pages
+     */
+    this.router = null;
 
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
@@ -43,7 +47,7 @@ export class WcesRouterBrain extends HTMLElement {
    */
   set location(value) {
     this._location = value;
-    if(value) {
+    if (value) {
       this.handleNavigation(value);
     }
   }
@@ -70,7 +74,7 @@ export class WcesRouterBrain extends HTMLElement {
       );
     }
     const content = this.shadowRoot.getElementById('content');
-    if(!content) {
+    if (!content) {
       return;
     }
     let found = false;
@@ -82,6 +86,7 @@ export class WcesRouterBrain extends HTMLElement {
         element.setAttribute('active', '');
         // @ts-ignore
         element.routingParams = routingData.routingParams;
+        element.router = this.router;
         found = true;
       }
     }
@@ -93,6 +98,7 @@ export class WcesRouterBrain extends HTMLElement {
       element.setAttribute('active', '');
       // @ts-ignore
       element.routingParams = routingData.routingParams;
+      element.router = this.router;
       content.appendChild(element);
     }
   }
@@ -127,7 +133,6 @@ export class WcesRouterBrain extends HTMLElement {
     return null;
   }
 }
-
 
 /**
  * A routing config item
