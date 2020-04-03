@@ -24,7 +24,8 @@ npm i @wces/router
       id: 'page2',
       pattern: '/page2/:name',
       component: 'app-page2',
-      url: '/demo/app-page2.js'
+      url: '/demo/app-page2.js',
+      context: async ({params: { name }}) => ({ greeting: `Hello ${name}`})
     }
   ];
   const route404 = {
