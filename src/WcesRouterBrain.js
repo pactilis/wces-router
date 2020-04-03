@@ -31,6 +31,8 @@ export class WcesRouterBrain extends HTMLElement {
      */
     this.router = null;
 
+    this.defaultContextPromise = () => Promise.resolve();
+
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.appendChild(template.content.cloneNode(true));
   }
@@ -60,6 +62,8 @@ export class WcesRouterBrain extends HTMLElement {
     const routingData = this.findRoute(location);
     if (routingData) {
       this.performRouting(routingData);
+    } else {
+      this.dispatchEvent(new CustomEvent('noroute', { bubbles: true, composed: true }));
     }
   }
 
@@ -73,34 +77,41 @@ export class WcesRouterBrain extends HTMLElement {
         console.error('Unable to load ', routingData.route.component, err),
       );
     }
-    const content = this.shadowRoot.getElementById('content');
-    if (!content) {
-      return;
-    }
-    let found = false;
-    for (const element of content.children) {
-      if (element.hasAttribute('active')) {
-        element.removeAttribute('active');
-      }
-      if (element.getAttribute('id') === routingData.route.id) {
-        element.setAttribute('active', '');
+    const contextPromise = routingData.route.context || this.defaultContextPromise;
+    contextPromise(routingData.routingParams)
+      .then(context => {
+        const content = this.shadowRoot.getElementById('content');
+        if (!content) {
+          return;
+        }
+        let found = false;
+        let elementToRender;
+        for (const element of content.children) {
+          if (element.hasAttribute('active')) {
+            element.removeAttribute('active');
+          }
+          if (element.getAttribute('id') === routingData.route.id) {
+            elementToRender = element;
+            found = true;
+          }
+        }
+        if (!found) {
+          // component does not exist yet - creating it
+          elementToRender = document.createElement(routingData.route.component);
+        }
+
+        elementToRender.className = 'page';
+        elementToRender.setAttribute('id', routingData.route.id);
+        elementToRender.setAttribute('active', '');
         // @ts-ignore
-        element.routingParams = routingData.routingParams;
-        element.router = this.router;
-        found = true;
-      }
-    }
-    if (!found) {
-      // component does not exist yet - creating it
-      const element = document.createElement(routingData.route.component);
-      element.className = 'page';
-      element.setAttribute('id', routingData.route.id);
-      element.setAttribute('active', '');
-      // @ts-ignore
-      element.routingParams = routingData.routingParams;
-      element.router = this.router;
-      content.appendChild(element);
-    }
+        elementToRender.routingParams = routingData.routingParams;
+        elementToRender.router = this.router;
+        elementToRender.context = context;
+        content.appendChild(elementToRender);
+      })
+      .then(() =>
+        this.dispatchEvent(new CustomEvent('routingdone', { bubbles: true, composed: true })),
+      );
   }
 
   /**
@@ -141,6 +152,7 @@ export class WcesRouterBrain extends HTMLElement {
  * @property {string} component The component name to render
  * @property {string} url The url path to fetch the component lazilly
  * @property {string} id identifier of this routing config item
+ * @property {Function} context a function that takes routingParams and return a promise that resolves to context object
  */
 
 /**
